@@ -1,6 +1,6 @@
-<script setup></script>
 <template>
-  <div class="login"></div>
+  <div class="topNav"></div>
 </template>
 
+<script setup></script>
 <style lang="scss" scoped></style>
