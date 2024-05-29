@@ -1,12 +1,18 @@
 <script setup>
-const handleSelect = (key, keyPath) => {
-  console.log(key, keyPath)
-}
+import { Promotion } from '@element-plus/icons-vue'
+import { useRoute, useRouter } from 'vue-router'
+const route = useRoute()
+const router = useRouter()
+const nowRoute = route.params.id
+const introRoute = `/movieDetail/${nowRoute}/introduction`
+const performerRoute = `/movieDetail/${nowRoute}/performer`
+const pictureRoute = `/movieDetail/${nowRoute}/picture`
+router.replace(introRoute)
 </script>
 <template>
   <div class="movieDetail">
     <div class="top">
-      <div class="main">
+      <div class="top-main">
         <img class="img" src="../../assets/image/movie.png" alt="" />
         <div class="info">
           <div class="movieName">哈尔的移动城堡</div>
@@ -17,58 +23,65 @@ const handleSelect = (key, keyPath) => {
       </div>
     </div>
     <div class="main">
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu-demo"
-        mode="horizontal"
-        @select="handleSelect"
-      >
-        <el-menu-item index="1">Processing Center</el-menu-item>
-        <el-menu-item index="1">Processing Center</el-menu-item>
-        <el-menu-item index="1">Processing Center</el-menu-item>
-        <!-- <el-sub-menu index="2">
-                <template #title>Workspace</template>
-                <el-menu-item index="2-1">item one</el-menu-item>
-                <el-menu-item index="2-2">item two</el-menu-item>
-                <el-menu-item index="2-3">item three</el-menu-item>
-                <el-sub-menu index="2-4">
-                    <template #title>item four</template>
-                    <el-menu-item index="2-4-1">item one</el-menu-item>
-                    <el-menu-item index="2-4-2">item two</el-menu-item>
-                    <el-menu-item index="2-4-3">item three</el-menu-item>
-                </el-sub-menu>
-                </el-sub-menu> -->
-        <!-- <el-menu-item index="3" disabled>Info</el-menu-item>
-                <el-menu-item index="4">Orders</el-menu-item> -->
-      </el-menu>
+      <div class="menu">
+        <el-menu
+          active-text-color="rgb(215, 152, 230)"
+          text-color="rgb(116, 116, 116)"
+          background-color="rgb(255, 255, 255)"
+          :default-active="introRoute"
+          mode="horizontal"
+          ellipsis="false"
+          router
+          style="border-bottom: 2px solid rgb(240, 240, 240)"
+        >
+          <el-menu-item :index="introRoute">
+            <el-icon>
+              <Promotion />
+            </el-icon>
+            <span style="font-size: 20px">介绍</span>
+          </el-menu-item>
+          <el-menu-item :index="performerRoute">
+            <el-icon>
+              <Promotion />
+            </el-icon>
+            <span style="font-size: 20px">演职人员</span>
+          </el-menu-item>
+          <el-menu-item :index="pictureRoute">
+            <el-icon>
+              <Promotion />
+            </el-icon>
+            <span style="font-size: 20px">图集</span>
+          </el-menu-item>
+        </el-menu>
+      </div>
+      <div class="menushow"><router-view></router-view></div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .movieDetail {
-  width: 100vw;
   min-width: 1000px;
   .top {
     height: 340px;
+    background-color: rgb(116, 116, 116);
     background: linear-gradient(
       to right,
       rgb(199, 234, 240),
       rgb(215, 152, 230)
     );
     padding-top: 60px;
-    padding-left: 180px;
-    .main {
-      width: 600px;
+    .top-main {
+      width: 75%;
+      margin: 0 auto;
       height: 400px;
-      // background-color: aquamarine;
       display: flex;
-      justify-content: space-between;
-      margin: 0;
+      justify-content: flex-start;
       .img {
         width: 240px;
         height: 330px;
         border: 6px solid rgb(255, 255, 255);
+        margin-right: 100px;
       }
       .info {
         width: 280px;
@@ -103,8 +116,14 @@ const handleSelect = (key, keyPath) => {
     }
   }
   .main {
-    width: 90%;
-    margin: 80px auto;
+    width: 70%;
+    margin: 100px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    .menu {
+      margin-bottom: 40px;
+    }
   }
 }
 </style>

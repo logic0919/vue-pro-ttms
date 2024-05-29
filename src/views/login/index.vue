@@ -3,9 +3,9 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 import { userRegisterService, userLoginService } from '@/api/user'
-// import { View } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/index'
 const userStore = useUserStore()
+const { setlocalTime, setAll, setlocalAll } = userStore
 const reInput = '请再次输入密码'
 // 一些表单数据绑定
 const clearForm = () => {
@@ -52,7 +52,6 @@ const register = async () => {
     email: formModel.value.email,
     pwd: pwdinp2.value.formModel.pwd
   })
-  console.log(res)
   if (res.data.status === 200) {
     ElMessage({ message: '邮件发送成功，请注意查收', type: 'success' })
   } else {
@@ -63,24 +62,21 @@ const register = async () => {
 const login = async () => {
   await form.value.validate()
   await pwdinp1.value.validate()
-  console.log(pwdinp1.value)
   const res = await userLoginService({
     id: formModel.value.id,
     pwd: pwdinp1.value.formModel.pwd
   })
-  console.log(res)
   if (res.data.status === 200) {
     const { token } = res.data.data
-    const { id, email, nick_name, avatar } = res.data.data.user
-    localStorage.setItem('ttms_token', token)
-    userStore.setToken(token)
-    userStore.setId(id)
-    userStore.setEmail(email)
-    userStore.setName(nick_name)
-    userStore.setAvatar(avatar)
+    const info = res.data.data.user
+    // 本地过期时间戳
+    setlocalTime()
+    // 本地信息+token
+    setlocalAll({ token, ...info })
+    // 仓库信息+token
+    setAll({ token, ...info })
     ElMessage({ message: '登录成功，即将跳转', type: 'success' })
     setTimeout(() => {
-      console.log('hh')
       router.push('/user')
     }, 3000)
   }

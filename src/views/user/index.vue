@@ -1,11 +1,14 @@
 <script setup>
 import { useUserStore } from '@/stores/index'
 import { userUpdateService, userUpdateAvatarService } from '@/api/user'
-import { ElMessage } from 'element-plus'
+// import { ElMessage } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 const userStore = useUserStore()
 const { token, id, name, avatar, email } = storeToRefs(userStore)
+const isInfo = ref('')
+isInfo.value = true
+// isInfo.value = false
 // 关于修改信息
 const form = ref(null)
 const formModel = ref({
@@ -36,15 +39,13 @@ const userUpdate = async () => {
   await form.value.validate()
   const res = await userUpdateService(name, token)
   if (res.data.status === 200) {
-    ElMessage.success('修改成功')
     userStore.setName(name)
+    userStore.setlocalName(name)
     isNameChange.value = !isNameChange.value
     console.log(userStore.name)
   }
 }
 // 修改头像开关
-const upload = ref(null)
-console.log(upload)
 const isAvatarChange = ref(false)
 const switchChangeAvatar = () => {
   isAvatarChange.value = !isAvatarChange.value
@@ -67,6 +68,12 @@ const submitFile = async () => {
   )
   console.log(res)
 }
+const switchInfo = () => {
+  isInfo.value = true
+}
+const switchOrder = () => {
+  isInfo.value = false
+}
 </script>
 
 <template>
@@ -80,66 +87,85 @@ const submitFile = async () => {
     <div class="line"></div>
     <div class="nav">
       <ul>
-        <li>个人信息</li>
-        <li>我的订单</li>
+        <li @click="switchInfo">个人信息</li>
+        <li @click="switchOrder">我的订单</li>
       </ul>
     </div>
   </div>
   <div class="right">
-    <div class="navName">个人信息</div>
-    <div class="line"></div>
-    <ul class="infoShow">
-      <li>
-        <h5 class="sortName">用户头像：</h5>
-        <div class="avatarShow" v-if="!isAvatarChange">
-          <div class="avatar"><el-avatar :size="50" :src="avatar" /></div>
-          <el-button
-            class="btn"
-            type="primary"
-            @click="switchChangeAvatar"
-            plain
-            >修改头像</el-button
-          >
-        </div>
-        <div class="avatarChange" v-else>
-          <input type="file" @change="handleFileUpload" />
-          <button @click="submitFile">上传</button>
-        </div>
-      </li>
-      <li>
-        <h5 class="sortName">用户id：</h5>
-        {{ id }}
-      </li>
-      <li>
-        <h5 class="sortName">昵称：</h5>
-        <div class="nameShow" v-if="!isNameChange">
-          <div class="name">{{ name }}</div>
-          <el-button class="btn" type="primary" @click="switchChangeName" plain
-            >修改呢称</el-button
-          >
-        </div>
-        <div class="nameChange" v-else>
-          <el-form class="elform" :model="formModel" :rules="rules" ref="form">
-            <el-form-item prop="name" class="elinput">
-              <el-input
-                v-model="formModel.name"
-                placeholder="请输入昵称"
-              ></el-input>
-            </el-form-item>
-          </el-form>
-          <el-button class="btn" type="primary" @click="userUpdate" plain
-            >提交修改</el-button
-          >
-          <el-button class="btn" type="primary" @click="switchChangeName" plain
-            >取消</el-button
-          >
-        </div>
-      </li>
-      <li>
-        <h5 class="sortName">邮箱：</h5>
-        {{ email }}
-      </li>
-    </ul>
+    <div class="info1" v-show="isInfo">
+      <div class="navName">个人信息</div>
+      <div class="line"></div>
+      <ul class="infoShow">
+        <li>
+          <h5 class="sortName">用户头像：</h5>
+          <div class="avatarShow" v-if="!isAvatarChange">
+            <div class="avatar"><el-avatar :size="50" :src="avatar" /></div>
+            <el-button
+              class="btn"
+              type="primary"
+              @click="switchChangeAvatar"
+              plain
+              >修改头像</el-button
+            >
+          </div>
+          <div class="avatarChange" v-else>
+            <input type="file" @change="handleFileUpload" />
+            <button @click="submitFile">上传</button>
+          </div>
+        </li>
+        <li>
+          <h5 class="sortName">用户id：</h5>
+          {{ id }}
+        </li>
+        <li>
+          <h5 class="sortName">昵称：</h5>
+          <div class="nameShow" v-if="!isNameChange">
+            <div class="name">{{ name }}</div>
+            <el-button
+              class="btn"
+              type="primary"
+              @click="switchChangeName"
+              plain
+              >修改呢称</el-button
+            >
+          </div>
+          <div class="nameChange" v-else>
+            <el-form
+              class="elform"
+              :model="formModel"
+              :rules="rules"
+              ref="form"
+            >
+              <el-form-item prop="name" class="elinput">
+                <el-input
+                  v-model="formModel.name"
+                  placeholder="请输入昵称"
+                ></el-input>
+              </el-form-item>
+            </el-form>
+            <el-button class="btn" type="primary" @click="userUpdate" plain
+              >提交修改</el-button
+            >
+            <el-button
+              class="btn"
+              type="primary"
+              @click="switchChangeName"
+              plain
+              >取消</el-button
+            >
+          </div>
+        </li>
+        <li>
+          <h5 class="sortName">邮箱：</h5>
+          {{ email }}
+        </li>
+      </ul>
+    </div>
+    <div class="orders" v-show="!isInfo">
+      <div class="order">我的订单</div>
+      <myOrder></myOrder>
+    </div>
   </div>
 </template>
 
@@ -203,57 +229,69 @@ const submitFile = async () => {
 .right {
   margin-top: 20px;
   margin-left: 260px;
-  background-color: rgb(240, 240, 240);
   width: 80vw;
   height: 94vh;
   border-radius: 10px;
   min-width: 400px;
   padding: 40px;
-  .navName {
-    height: 30px;
-    margin-bottom: 10px;
-  }
-  .line {
-    width: 100%;
-    height: 2px;
-    background-color: rgb(155, 155, 155);
-    margin: 0 auto;
-    border-radius: 2px;
-  }
-  .infoShow {
-    height: 330px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    li {
-      height: 90px;
+  background-color: rgb(240, 240, 240);
+  .info1 {
+    .navName {
+      height: 30px;
+      margin-bottom: 10px;
+    }
+    .line {
+      width: 100%;
+      height: 2px;
+      background-color: rgb(155, 155, 155);
+      margin: 0 auto;
+      border-radius: 2px;
+    }
+    .infoShow {
+      height: 330px;
       display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      border-bottom: 1px dashed rgb(158, 158, 158);
-      .sortName {
-        width: 100px;
-        margin-right: 20px;
-        font-size: 17px;
-      }
-      .avatarShow,
-      .avatarChange {
+      flex-direction: column;
+      justify-content: space-around;
+      li {
+        height: 90px;
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        .btn {
-          margin-left: 20px;
+        border-bottom: 1px dashed rgb(158, 158, 158);
+        .sortName {
+          width: 100px;
+          margin-right: 20px;
+          font-size: 17px;
+        }
+        .avatarShow,
+        .avatarChange {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          .btn {
+            margin-left: 20px;
+          }
+        }
+        .nameShow,
+        .nameChange {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          .btn {
+            margin-left: 20px;
+          }
         }
       }
-      .nameShow,
-      .nameChange {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        .btn {
-          margin-left: 20px;
-        }
-      }
+    }
+  }
+  .orders {
+    .order {
+      color: rgb(255, 100, 100);
+      border-bottom: 1px solid rgb(156, 156, 156);
+      height: 40px;
+      padding-left: 15px;
+      font-size: 22px;
+      letter-spacing: 5px;
     }
   }
 }

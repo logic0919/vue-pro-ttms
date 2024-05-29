@@ -57,7 +57,7 @@ const userSendEmailService = (obj) => {
 }
 // 验证验证码
 const userVerifyEmailService = (token) => {
-  console.log('验证邮箱api')
+  console.log('验证邮箱api' + token)
   return request.post('/api/v1/user/valid-email', null, {
     headers: {
       Authorization: token
