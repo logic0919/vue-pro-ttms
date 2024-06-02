@@ -5,10 +5,27 @@ import {
   movieGetUnreleasedService,
   movieGetAllService
 } from '../../api/movie'
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 const movie_list = ref([])
 movie_list.value = [
+  {
+    id: 1,
+    chinese_name: '战狼',
+    english_name: 'chinese_wolf',
+    category: '爱情 喜剧 动画 ',
+    area: '中国',
+    duration: 7200000000000,
+    showtime: '2017-01-10T16:00:00Z',
+    introduction: '爱国 超级爱国',
+    img_path:
+      'https://p0.pipi.cn/mmdb/54ecde87b530faecd887a9594b90e05caa15d.jpg?imageView2/1/w/160/h/220',
+    on_sale: false,
+    score: 0,
+    sales: 0,
+    directors: null,
+    actors: null
+  },
   {
     id: 1,
     chinese_name: '战狼',
@@ -44,42 +61,52 @@ movie_list.value = [
     actors: null
   }
 ]
+onMounted(() => {
+  refNav.value.children[0].style.backgroundColor = 'red'
+})
+// 页数统计
+const totalPage = ref(0)
+// 对数组长度进行修正
 watch(
   () => movie_list.value.length,
   (newValue) => {
     const sub = 5 - (newValue % 5)
     let arr = []
-    for (let i = 0; i < sub; i++) {
-      arr.push({
-        id: -1,
-        chinese_name: '',
-        category: '',
-        duration: 0,
-        img_path: ''
-      })
+    if (sub !== 5) {
+      for (let i = 0; i < sub; i++) {
+        arr.push({
+          id: -1,
+          chinese_name: '',
+          category: '',
+          duration: 0,
+          img_path: ''
+        })
+      }
     }
     movie_list.value.push(...arr)
+    // totalPage.value = Math.ceil(movie_list.value.length / 30)
+    // console.log(totalPage.value)
   },
   { immediate: true }
 )
 // 区分热映或是即将热映或是全部影片，默认正在热映hot
 const nav_id = ref(0)
 const sort_id = ref(0)
-const page = ref(0)
+const page = ref(1)
+const refNav = ref(null)
 // 切换导航
-const switchNav = (num) => {
+const switchNav = (num, e) => {
   nav_id.value = num
+  refNav.value.children[0].style.backgroundColor = 'transparent'
+  refNav.value.children[1].style.backgroundColor = 'transparent'
+  refNav.value.children[2].style.backgroundColor = 'transparent'
+  e.target.style.backgroundColor = 'rgb(246, 65, 65)'
   //   sort和page都要归零
   sort_id.value = 0
   page.value = 0
-  //   重新发送请求
-  if (nav_id.value === 0) {
-    getHot()
-  } else if (nav_id.value === 1) {
-    getUnreleased()
-  } else if (nav_id.value === 2) {
-    getAll()
-  }
+  lastActive.value.style.color = 'black'
+  lastActive.value = ref1.value.children[0]
+  lastActive.value.style.color = 'red'
 }
 // 发送全部类型、第一页的函数
 const getHot = async () => {
@@ -115,64 +142,67 @@ const getAll = async () => {
     ElMessage.error('获取影片列表失败')
   }
 }
+// 默认第一个高亮
+// 这里的定时器应该切换为钩子函数更合理
+const ref1 = ref(null)
+const lastActive = ref()
+setTimeout(() => {
+  lastActive.value = ref1.value.children[0]
+  lastActive.value.style.color = 'red'
+}, 10)
 // 切换类型
 const switchSort = (e, num) => {
-  console.log((e.target.style.color = 'blue'))
-  console.log(num)
+  lastActive.value.style.color = 'black'
+  e.target.style.color = 'red'
+  lastActive.value = e.target
   sort_id.value = num
 }
-// const sortBkgc = (num) => {
-//   return num === sort_id.value ? 'background-color: red' : 'background-color: white'
-// }
-// const test1 = computed(() => {
-//   return
-// })
-// const arr1 = ref([ref(0), ref(0)])
-// arr1.value[0].value = 2
-// arr1.value[1].value = 4
-// console.log(arr1.value[0].value)
-// console.log(arr1.value[1].value)
-const arr1 = new Array(sort.length).fill(ref(66))
-const refs = ref(arr1)
-
+// 对nav、类型、页码进行监听，一个有变就发请求
 watch(
-  () => sort_id.value,
-  (newValue) => {
-    // console.log(refs.value[0].value)
-    // console.log(oldValue)
-    // console.log(newValue)
-    console.log(refs.value[newValue].value)
-    // if (oldValue) {
-    //   refs.value[oldValue].value.style.backgroundColor = 'white'
-    // }
-    // refs.value[newValue].value.style.backgroundColor = 'red'
+  () => {
+    return {
+      nav: nav_id.value,
+      sort: sort_id.value,
+      page: page.value
+    }
   },
-  { immediate: true }
+  (newValue) => {
+    if (newValue.nav === 0) {
+      console.log('发hot请求')
+      console.log(nav_id.value, sort[sort_id.value], page.value)
+      getHot()
+    } else if (newValue.nav === 1) {
+      console.log('发unreleased请求')
+      console.log(nav_id.value, sort[sort_id.value], page.value)
+      getUnreleased()
+    } else if (newValue.nav === 2) {
+      console.log('发all请求')
+      console.log(nav_id.value, sort[sort_id.value], page.value)
+      getAll()
+    }
+  },
+  {
+    immediate: true,
+    deep: true
+  }
 )
-setTimeout(() => {
-  console.log(refs.value[sort_id.value].value)
-}, 1000)
 </script>
 
 <template>
   <div class="movie">
-    <div class="top">
-      <div class="hot" @click="switchNav(0)">热映</div>
-      <div class="will" @click="switchNav(1)">即将上映</div>
-      <div class="all" @click="switchNav(2)">所有影片</div>
+    <div class="top" ref="refNav">
+      <div class="hot" @click="(e) => switchNav(0, e)">热映</div>
+      <div class="will" @click="(e) => switchNav(1, e)">即将上映</div>
+      <div class="all" @click="(e) => switchNav(2, e)">所有影片</div>
     </div>
     <div class="main">
       <div class="nav">
         <div class="text">类型：</div>
-        <div class="sort">
+        <div class="sort" ref="ref1">
           <div
             class="sort-item"
             v-for="(i, index) in sort"
-            :ref="refs[index]"
             :key="i"
-            :style="{
-              backgroundColor: index == sort_id ? 'red' : 'blue'
-            }"
             @click="(e) => switchSort(e, index)"
           >
             {{ i }}
@@ -191,9 +221,16 @@ setTimeout(() => {
             :category="i.category"
           ></movieBox>
         </div>
-        <!-- <div class="page">
-          <el-pagination background layout="prev, pager, next" :total="1000" />
-        </div> -->
+        <div class="page">
+          <el-pagination
+            class="pageMain"
+            v-model:current-page="page"
+            background="red"
+            layout="prev, pager, next"
+            :total="totalPage"
+            @current-change="changePage()"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -217,17 +254,16 @@ setTimeout(() => {
       width: 130px;
       height: 100%;
       color: rgb(255, 255, 255);
-      background-color: rgb(49, 95, 135);
       line-height: 70px;
       letter-spacing: 2px;
       text-align: center;
     }
   }
   .main {
-    width: 80%;
+    width: 1078px;
     margin: 0 auto;
     margin-top: 50px;
-    background-color: rgb(239, 239, 239);
+    // background-color: rgb(239, 239, 239);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -257,6 +293,7 @@ setTimeout(() => {
           border-radius: 15px;
           line-height: 27px;
           border: 1px solid red;
+          margin-bottom: 10px;
         }
       }
     }
@@ -266,7 +303,8 @@ setTimeout(() => {
         justify-content: space-between;
         flex-wrap: wrap;
       }
-      .page {
+      .pageMain {
+        margin: 30px auto;
       }
     }
   }

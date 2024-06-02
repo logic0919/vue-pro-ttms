@@ -48,7 +48,7 @@ const { token, name, avatar } = storeToRefs(userStore)
       display: flex;
       height: 100%;
       .logo {
-        width: 220px;
+        width: 200px;
         height: 100%;
       }
       .movie,

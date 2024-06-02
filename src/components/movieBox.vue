@@ -1,4 +1,7 @@
 <script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const props = defineProps({
   id: Number,
   img: String,
@@ -6,12 +9,16 @@ const props = defineProps({
   duration: Number,
   category: String
 })
-const time = props.duration / 6000
+const time = props.duration / 60000000000
 </script>
 
 <template>
   <div class="movieBox1" v-if="id < 0"></div>
-  <div class="movieBox" v-else>
+  <div
+    class="movieBox"
+    @click="router.push(`/movieDetail/${props.id}/introduction`)"
+    v-else
+  >
     <div class="img">
       <img :src="img" alt="" />
       <div class="info">
@@ -25,8 +32,8 @@ const time = props.duration / 6000
 
 <style lang="scss" scoped>
 .movieBox1 {
-  width: 150px;
-  height: 220px;
+  width: 180px;
+  height: 280px;
   margin-top: 30px;
 }
 .movieBox {
