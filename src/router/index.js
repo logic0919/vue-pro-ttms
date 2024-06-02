@@ -19,7 +19,9 @@ import viewHall from '@/views/adminHall/viewHall.vue'
 import showSession from '@/views/adminSession/showSession.vue'
 import addSession from '@/views/adminSession/addSession.vue'
 import viewSession from '@/views/adminSession/viewSession.vue'
+import movieSession from '@/views/movieDetail/movieSession.vue'
 import notFound from '@/views/notFound/index.vue'
+// import { useUserStore } from '@/stores/index'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -52,6 +54,7 @@ const router = createRouter({
       path: '/admin',
       name: 'admin',
       component: admin,
+      redirect: '/admin/showHall/1',
       children: [
         // 关于影厅管理
         {
@@ -110,7 +113,7 @@ const router = createRouter({
       component: test
     },
     {
-      path: '/order',
+      path: '/order/:session_id',
       name: 'order',
       component: order
     },
@@ -138,11 +141,64 @@ const router = createRouter({
       ]
     },
     {
+      path: '/movieSession/:id',
+      name: 'movieSession',
+      component: movieSession
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'notFound',
       component: notFound
     }
   ]
 })
+// // 登录禁止权限页面路径数组
+// const authUrls = [
+//   'user',
+//   'showHall',
+//   'viewHall',
+//   'addHall',
+//   'showSession',
+//   'viewSession',
+//   'addSession',
+//   'addTheater',
+//   'addMovie',
+//   'orderShow'
+// ]
+// // 管理员禁止权限页面
+// const adminUrls = [
+//   'showHall',
+//   'viewHall',
+//   'addHall',
+//   'showSession',
+//   'viewSession',
+//   'addSession',
+//   'addTheater',
+//   'addMovie'
+// ]
+// router.beforeEach((to, from, next) => {
+//   const userStore = useUserStore()
+//   const id = userStore.id
+//   const status = userStore.status
+//   //   管理员要求页面
+//   if (adminUrls.includes(to.name)) {
+//     console.log('进入管理页面')
+//     // 登录并且身份是管理员
+//     if (!(id && status === 3)) {
+//       ElMessage.error('权限不足，无法访问')
+//       return
+//     }
+//   }
+//   // 登录要求页面
+//   else if (authUrls.includes(to.name)) {
+//     console.log('进入登录限制页面')
+//     if (!id) {
+//       ElMessage.error('请先登录')
+//       next('/login')
+//       return
+//     }
+//   }
+//   next()
+// })
 
 export default router

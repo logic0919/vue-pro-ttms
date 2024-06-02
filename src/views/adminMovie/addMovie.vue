@@ -1,7 +1,7 @@
 <script setup>
 // import { movieAddService } from '@/api/movie'
 import { movieAddService } from '@/api/movie'
-import { sort } from '@/utils/data'
+import { sort, formatDate } from '@/utils/data'
 import { ref, nextTick } from 'vue'
 // 关于类型标签的部分
 const onChange = (i) => {
@@ -83,14 +83,6 @@ const handleInputConfirm1 = () => {
   }
   inputVisible1.value = false
   inputValue1.value = ''
-}
-// 修改时间格式，跟上映日期的输入有关
-const formatDate = (dateStr) => {
-  const date = new Date(dateStr)
-  if (isNaN(date.getTime())) {
-    throw new Error('Invalid date string')
-  }
-  return date.toISOString().split('T')[0]
 }
 const carouse = ref([])
 console.log(formatDate(formModel.value.date))

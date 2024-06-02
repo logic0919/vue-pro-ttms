@@ -1,59 +1,43 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { movieGetHottheaterService } from '../../api/movie'
-import { sessionGetListService, sessionDelService } from '../../api/session'
-import { getDate, formatDate, formatTime1 } from '../../utils/data'
+import { theaters, getDate, formatDate, formatTime1 } from '@/utils/data'
+import { sessionGetListService } from '@/api/session'
+import { ref, watch } from 'vue'
 const route = useRoute()
 const router = useRouter()
-const theater_id = route.params.theater_id
-const movie_list = ref([])
-movie_list.value = [
-  { id: 0, name: '全部' },
-  { id: 1, name: '电影1' },
-  { id: 2, name: '电影2' },
-  { id: 3, name: '电影3' },
-  { id: 4, name: '电影4' },
-  { id: 5, name: '电影5' },
-  { id: 6, name: '电影6' },
-  { id: 7, name: '电影7' }
-]
-onMounted(async () => {
-  const res = await movieGetHottheaterService(theater_id)
-  if (res.data.status === 200) {
-    movie_list.value = res.data.data
-    movie_list.value.unshift({ id: 0, name: '全部' })
-  } else {
-    ElMessage({ message: '影片获取失败', type: 'error' })
-  }
-})
-const radio1 = ref(0)
-const dateData = getDate()
-const radio2 = ref(dateData[0].dateid)
-const addSession = () => {
-  router.push(`/admin/addSession/${theater_id}`)
+const movie_id = route.params.id
+const detailRoute = `/movieDetail/${movie_id}/introduction`
+const gotodetail = () => {
+  router.push(detailRoute)
 }
-// 要渲染的场次信息列表
 const session_list = ref([])
-// 监听选项是否发生变化
+// 今明后三个日期信息，用于渲染页面
+const dateData = getDate()
+// const theater_list = [
+//   {
+//     key: 0,
+//     value: '全部'
+//   }
+// ].concat(theaters)
+const radio1 = ref(1)
+const radio2 = ref(dateData[0].dateid)
 watch(
   () => {
     return {
-      movie: radio1.value,
+      theater: radio1.value,
       date: radio2.value
     }
   },
   async (newValue) => {
-    console.log(theater_id, newValue.movie, formatDate(newValue.date))
     const res = await sessionGetListService({
-      theater_id,
-      movie_id: newValue.movie,
+      theater_id: newValue.theater,
+      movie_id: movie_id,
       date: formatDate(newValue.date)
     })
     if (res.data.status === 200) {
       session_list.value = res.data.data.item
     } else {
-      ElMessage({ message: '影片获取失败', type: 'error' })
+      ElMessage({ message: '场次信息获取失败', type: 'error' })
     }
   },
   {
@@ -61,9 +45,13 @@ watch(
     deep: true
   }
 )
-const total = computed(() => {
-  return session_list.value.length
-})
+const color = (i) => {
+  if (i % 2 == 0) {
+    return 'background-color: #e7e7e7;'
+  } else {
+    return 'background-color: #d6d6d6'
+  }
+}
 // 模拟数据
 session_list.value = [
   {
@@ -211,77 +199,49 @@ session_list.value = [
     SeatRow: 4
   }
 ]
-const color = (i) => {
-  if (i % 2 == 0) {
-    return 'background-color: #e7e7e7;'
-  } else {
-    return 'background-color: #d6d6d6'
-  }
-}
-// 删除场次
-const delSession = async (id) => {
-  ElMessageBox.confirm('确定删除场次？', '提示')
-    .then(async () => {
-      const res = await sessionDelService(id)
-      if (res.data.status === 200) {
-        ElMessage({ message: '场次删除成功', type: 'success' })
-        session_list.value = session_list.value.filter((item) => {
-          return item.ID != id
-        })
-      } else {
-        ElMessage({ message: '场次删除失败', type: 'error' })
-      }
-    })
-    .catch(() => {})
-}
-// 跳转至信息展示页面
-const gotoInfo = (id) => {
-  router.push(`/admin/viewSession/${theater_id}/${id}`)
-}
 </script>
-
 <template>
-  <div class="showSession">
-    <div class="chooseBox">
-      <div class="movieChoose">
-        <div class="text">影片：</div>
-        <el-radio-group class="radios" v-model="radio1">
-          <el-radio
-            class="movie-item"
-            v-for="i in movie_list"
-            :value="i.id"
-            :key="i.id"
-            size="large"
-            border
-            >{{ i.name }}</el-radio
-          >
-        </el-radio-group>
-      </div>
-      <div class="dateChoose">
-        <div class="text">日期：</div>
-        <el-radio-group class="radios" v-model="radio2">
-          <el-radio
-            class="movie-item"
-            v-for="i in dateData"
-            :value="i.dateid"
-            :key="i.dateid"
-            size="large"
-            border
-            >{{ i.str }}</el-radio
-          >
-        </el-radio-group>
+  <div class="movieSession">
+    <div class="top">
+      <div class="top-main">
+        <img class="img" src="../../assets/image/movie.png" alt="" />
+        <div class="info">
+          <div class="movieName">哈尔的移动城堡</div>
+          <div class="type">类型：剧情、爱情</div>
+          <div class="time">时长：108分钟</div>
+          <button class="btn" @click="gotodetail()">查看详细信息</button>
+        </div>
       </div>
     </div>
-    <div class="main1">
-      <div class="top">
-        <div class="total">已找到{{ total }}场安排</div>
-        <div class="add">
-          <el-button
-            style="width: 100px; height: 40px"
-            type="primary"
-            @click="addSession"
-            >增加场次</el-button
-          >
+    <div class="main">
+      <div class="chooseBox">
+        <div class="movieChoose">
+          <div class="text">影院：</div>
+          <el-radio-group class="radios" v-model="radio1">
+            <el-radio
+              class="movie-item"
+              v-for="i in theaters"
+              :value="i.key"
+              :key="i.key"
+              size="large"
+              border
+              >{{ i.value }}</el-radio
+            >
+          </el-radio-group>
+        </div>
+        <div class="dateChoose">
+          <div class="text">日期：</div>
+          <el-radio-group class="radios" v-model="radio2">
+            <el-radio
+              class="movie-item"
+              v-for="i in dateData"
+              :value="i.dateid"
+              :key="i.dateid"
+              size="large"
+              border
+              >{{ i.str }}</el-radio
+            >
+          </el-radio-group>
         </div>
       </div>
       <div class="session_list">
@@ -306,11 +266,11 @@ const gotoInfo = (id) => {
           <span class="hall">{{ i.Hall.Name }}</span>
           <span class="price">￥{{ i.Price }}</span>
           <span class="opea">
-            <el-button class="btn" type="primary" @click="gotoInfo(i.ID)"
-              >查看</el-button
-            >
-            <el-button class="btn" type="primary" @click="delSession(i.ID)"
-              >删除</el-button
+            <el-button
+              class="btn"
+              type="primary"
+              @click="router.push(`/order/${i.ID}`)"
+              >选座购票</el-button
             >
           </span>
         </div>
@@ -320,61 +280,100 @@ const gotoInfo = (id) => {
 </template>
 
 <style lang="scss" scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-.showSession {
-  padding-top: 30px;
-  width: 90%;
-  min-width: 700px;
-  margin: 0 auto;
-  .chooseBox {
-    border: 1px solid #ccc;
-    padding: 16px;
-    .movieChoose {
+.movieSession {
+  min-width: 1000px;
+  .top {
+    height: 340px;
+    background-color: rgb(116, 116, 116);
+    background: linear-gradient(
+      to right,
+      rgb(199, 234, 240),
+      rgb(215, 152, 230)
+    );
+    padding-top: 60px;
+    .top-main {
+      width: 75%;
+      margin: 0 auto;
+      height: 400px;
       display: flex;
-      padding-bottom: 10px;
-      border-bottom: 1px dashed #ccc;
-      .text {
-        width: 70px;
+      justify-content: flex-start;
+      .img {
+        width: 240px;
+        height: 330px;
+        border: 6px solid rgb(255, 255, 255);
+        margin-right: 100px;
       }
-      .radios {
-        .movie-item {
-          margin-right: 10px;
-          margin-bottom: 10px;
+      .info {
+        width: 280px;
+        height: 260px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        // background-color: antiquewhite;
+        .movieName,
+        .type,
+        .time {
+          color: aliceblue;
+          font-size: 16px;
+          // height: 30px;
         }
-      }
-    }
-    .dateChoose {
-      display: flex;
-      padding-top: 16px;
-      .text {
-        width: 70px;
-      }
-      .radios {
-        .movie-item {
-          margin-right: 10px;
-          margin-bottom: 10px;
+        .time {
+          margin-bottom: 60px;
+        }
+        .movieName {
+          font-size: 30px;
+        }
+        .btn {
+          width: 100%;
+          height: 46px;
+          border-color: transparent;
+          background-color: red;
+          color: rgb(255, 255, 255);
+          font-size: 20px;
+          letter-spacing: 10px;
         }
       }
     }
   }
-  .main1 {
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 80px;
-      border-bottom: 1px solid rgb(105, 105, 105);
-      margin-bottom: 30px;
-      .total {
+  .main {
+    width: 70%;
+    margin: 100px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    .chooseBox {
+      border: 1px solid #ccc;
+      padding: 16px;
+      .movieChoose {
+        display: flex;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed #ccc;
+        .text {
+          width: 70px;
+        }
+        .radios {
+          .movie-item {
+            margin-right: 10px;
+            margin-bottom: 10px;
+          }
+        }
       }
-      .add {
+      .dateChoose {
+        display: flex;
+        padding-top: 16px;
+        .text {
+          width: 70px;
+        }
+        .radios {
+          .movie-item {
+            margin-right: 10px;
+            margin-bottom: 10px;
+          }
+        }
       }
     }
     .session_list {
+      margin-top: 40px;
       .nav,
       .item {
         display: flex;
@@ -387,7 +386,7 @@ const gotoInfo = (id) => {
       .nav {
         height: 80px;
         border-bottom: 1px solid rgb(105, 105, 105);
-        background-color: rgb(156, 156, 156);
+        background-color: rgb(171, 171, 171);
         span {
           font-size: 22px;
           color: rgb(255, 255, 255);
@@ -400,7 +399,7 @@ const gotoInfo = (id) => {
           text-align: center;
         }
         .btn {
-          width: 50px;
+          width: 100px;
           border-radius: 30px;
           background-color: rgb(237, 31, 31);
           border-color: transparent;

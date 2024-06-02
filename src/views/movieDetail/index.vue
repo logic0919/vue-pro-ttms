@@ -7,6 +7,7 @@ const nowRoute = route.params.id
 const introRoute = `/movieDetail/${nowRoute}/introduction`
 const performerRoute = `/movieDetail/${nowRoute}/performer`
 const pictureRoute = `/movieDetail/${nowRoute}/picture`
+const sessionRoute = `/movieSession/${nowRoute}`
 router.replace(introRoute)
 </script>
 <template>
@@ -18,7 +19,7 @@ router.replace(introRoute)
           <div class="movieName">哈尔的移动城堡</div>
           <div class="type">类型：剧情、爱情</div>
           <div class="time">时长：108分钟</div>
-          <button class="btn">购票</button>
+          <button class="btn" @click="router.push(sessionRoute)">购票</button>
         </div>
       </div>
     </div>

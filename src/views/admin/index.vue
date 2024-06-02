@@ -13,11 +13,11 @@ const adminSessionRouter = (theater_id) => {
   <div class="admin">
     <div class="menu">
       <el-menu
-        default-active="2"
         class="el-menu-vertical-demo"
         @open="handleOpen"
         @close="handleClose"
         router
+        default-active="/admin/showHall/1"
       >
         <el-sub-menu index="3">
           <template #title>
