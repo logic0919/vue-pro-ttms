@@ -12,6 +12,7 @@ import { storeToRefs } from 'pinia'
 import { onMounted, provide, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { orderReturnService } from '@/api/order'
+import { useRouter } from 'vue-router'
 const userStore = useUserStore()
 const { id, name, avatar, email } = storeToRefs(userStore)
 const isInfo = ref('')
@@ -19,6 +20,7 @@ isInfo.value = true
 // isInfo.value = false
 // 关于修改信息
 const form = ref(null)
+const router = useRouter()
 const formModel = ref({
   name: ''
 })
@@ -138,6 +140,23 @@ const cancle = () => {
   isRecharge.value = false
   count.value = ''
 }
+const loginout = () => {
+  ElMessageBox.confirm('确定退出登录吗？', '提示')
+    .then(async () => {
+      userStore.clearAll()
+      userStore.setAll({
+        id: '',
+        name: '',
+        avatar: '',
+        email: '',
+        token: '',
+        status: ''
+      })
+      ElMessage.success('退出成功')
+      router.push('/login')
+    })
+    .catch(() => {})
+}
 </script>
 
 <template>
@@ -251,6 +270,10 @@ const cancle = () => {
               >
             </div>
           </li>
+          <li>
+            <h5 class="sortName">退出登录：</h5>
+            <el-button type="primary" @click="loginout">退出登录</el-button>
+          </li>
         </ul>
       </div>
       <div class="orders" v-show="!isInfo">
@@ -361,7 +384,7 @@ const cancle = () => {
         border-radius: 2px;
       }
       .infoShow {
-        height: 330px;
+        height: 400px;
         display: flex;
         flex-direction: column;
         justify-content: space-around;

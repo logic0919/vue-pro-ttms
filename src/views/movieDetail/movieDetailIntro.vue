@@ -6,7 +6,9 @@ import { ref } from 'vue'
 const route = useRoute()
 const movie_id = Number(route.params.id)
 const info1 = '介绍'
-const info2 = '评论'
+// const info2 = '评论'
+const info3 = ref('introduction')
+// const info4 = ref('comment')
 const intro = ref('')
 const getInfo = async () => {
   const res = await movieGetInfoService(movie_id)
@@ -22,13 +24,13 @@ getInfo()
 </script>
 <template>
   <div class="movieDetailIntro">
-    <navText :info="info1"></navText>
+    <navText :info="info1" :eng="info3"></navText>
     <div class="text">
       {{ intro }}
     </div>
-    <div class="commit">
-      <navText :info="info2"></navText>
-    </div>
+    <!-- <div class="commit">
+      <navText :info="info2" :eng="info4"></navText>
+    </div> -->
   </div>
 </template>
 

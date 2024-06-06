@@ -8,7 +8,6 @@ import movieDetailPerformer from '../views/movieDetail/movieDetailPerformer.vue'
 import movieDetailPicture from '../views/movieDetail/movieDetailPicture.vue'
 import movie from '../views/movie/index.vue'
 import addMovie from '../views/adminMovie/addMovie.vue'
-import test from '../views/test/index.vue'
 import order from '../views/order/setOrder.vue'
 import orderShow from '../views/order/payOrder.vue'
 import addHall from '../views/adminHall/addHall.vue'
@@ -24,14 +23,14 @@ import viewMovie from '@/views/adminMovie/viewMovie.vue'
 import showMovie from '@/views/adminMovie/showMovie.vue'
 import notFound from '@/views/notFound/index.vue'
 import index from '@/views/index/index.vue'
-// import { useUserStore } from '@/stores/index'
+import { useUserStore } from '@/stores/index'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/movieDetail/111'
+      redirect: '/index'
     },
     {
       path: '/index',
@@ -126,11 +125,6 @@ const router = createRouter({
       component: orderShow
     },
     {
-      path: '/test',
-      name: 'test',
-      component: test
-    },
-    {
       path: '/order/:session_id',
       name: 'order',
       component: order
@@ -170,53 +164,55 @@ const router = createRouter({
     }
   ]
 })
-// // 登录禁止权限页面路径数组
-// const authUrls = [
-//   'user',
-//   'showHall',
-//   'viewHall',
-//   'addHall',
-//   'showSession',
-//   'viewSession',
-//   'addSession',
-//   'addTheater',
-//   'addMovie',
-//   'orderShow'
-// ]
-// // 管理员禁止权限页面
-// const adminUrls = [
-//   'showHall',
-//   'viewHall',
-//   'addHall',
-//   'showSession',
-//   'viewSession',
-//   'addSession',
-//   'addTheater',
-//   'addMovie'
-// ]
-// router.beforeEach((to, from, next) => {
-//   const userStore = useUserStore()
-//   const id = userStore.id
-//   const status = userStore.status
-//   //   管理员要求页面
-//   if (adminUrls.includes(to.name)) {
-//     console.log('进入管理页面')
-//     // 登录并且身份是管理员
-//     if (!(id && status === 3)) {
-//       ElMessage.error('权限不足，无法访问')
-//       return
-//     }
-//   }
-//   // 登录要求页面
-//   else if (authUrls.includes(to.name)) {
-//     console.log('进入登录限制页面')
-//     if (!id) {
-//       ElMessage.error('请先登录')
-//       next('/login')
-//       return
-//     }
-//   }
-//   next()
-// })
+// 登录禁止权限页面路径数组
+const authUrls = [
+  'user',
+  'showHall',
+  'viewHall',
+  'addHall',
+  'showSession',
+  'viewSession',
+  'addSession',
+  'addTheater',
+  'addMovie',
+  'orderShow',
+  'showMovie'
+]
+// 管理员禁止权限页面
+const adminUrls = [
+  'showHall',
+  'viewHall',
+  'addHall',
+  'showSession',
+  'viewSession',
+  'addSession',
+  'addTheater',
+  'addMovie',
+  'showMovie'
+]
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+  const id = userStore.id
+  const status = userStore.status
+  //   管理员要求页面
+  if (adminUrls.includes(to.name)) {
+    console.log('进入管理页面')
+    // 登录并且身份是管理员
+    if (!(id && status === 'administrator')) {
+      ElMessage.error('权限不足，无法访问')
+      return
+    }
+  }
+  // 登录要求页面
+  else if (authUrls.includes(to.name)) {
+    console.log('进入登录限制页面')
+    if (!id) {
+      ElMessage.error('请先登录')
+      next('/login')
+      return
+    }
+  }
+  next()
+})
 
 export default router

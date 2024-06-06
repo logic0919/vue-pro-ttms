@@ -53,6 +53,7 @@ export const useUserStore = defineStore('user', () => {
   // 1个清除local函数
   const clearAll = () => {
     localStorage.clear('ttms_token')
+    localStorage.clear('ttms_time')
   }
   return {
     token,

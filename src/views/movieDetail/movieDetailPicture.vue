@@ -30,17 +30,19 @@ const getInfo = async () => {
 getInfo()
 const info1 = '导演'
 const info2 = '演员'
+const info3 = 'director'
+const info4 = 'actor'
 </script>
 <template>
   <div class="movieDetailPicture">
-    <navText :info="info1"></navText>
+    <navText :info="info1" :eng="info3"></navText>
     <div class="a">
       <div class="img" v-for="i in director" :key="i.name">
         <img :src="i.img" alt="" />
         <div class="name">{{ i.name }}</div>
       </div>
     </div>
-    <navText :info="info2"></navText>
+    <navText :info="info2" :eng="info4"></navText>
     <div class="a">
       <div class="img" v-for="i in actor" :key="i.name">
         <img :src="i.img" alt="" />
