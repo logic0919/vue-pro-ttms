@@ -12,7 +12,7 @@ const rules = ref({
 })
 const addHall = async () => {
   await form.value.validate()
-  const res = theaterAddService(formModel.value)
+  const res = await theaterAddService(formModel.value)
   if (res.data.status === 200) {
     ElMessage({ message: '创建影院成功', type: 'success' })
   } else {

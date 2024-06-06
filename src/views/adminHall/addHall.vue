@@ -1,10 +1,10 @@
 <script setup>
 import { ref, provide, watch } from 'vue'
-import { theaters, findtheaterId, findtheaterName } from '@/utils/data'
-// import { hallAddService } from '@/api/hall'
+import { theaters, findtheaterName } from '@/utils/data'
+import { hallAddService } from '@/api/hall'
 import { ElMessage } from 'element-plus'
-// import { useRoute } from 'vue-router'
-// const route = useRoute()
+import { useRoute } from 'vue-router'
+const route = useRoute()
 // 关于表单
 const formModel = ref({
   name: '',
@@ -12,8 +12,7 @@ const formModel = ref({
   row: '',
   theater: ''
 })
-formModel.value.theater = findtheaterName(1)
-// formModel.value.theater = route.params.theater_id
+const theater_id = Number(route.params.theater_id)
 const form = ref(null)
 const rules = ref({
   name: [{ required: true, message: '请输入影厅名', trigger: 'blur' }],
@@ -90,32 +89,25 @@ const handleClose = () => {
 const getSeatStr = () => {
   return seat.value.map((item) => item.join(',')).join(',')
 }
-findtheaterId(formModel.value.theater)
+formModel.value.theater = findtheaterName(theater_id)
 const addHall = async () => {
   await form.value.validate()
   if (seat.value.length === 0) {
     ElMessage({ message: '请先生成座位表', type: 'error' })
     return
   }
-  console.log(
-    findtheaterId(formModel.value.theater),
-    formModel.value.name,
-    formModel.value.row,
-    formModel.value.col,
-    getSeatStr()
-  )
-  // const res = await hallAddService({
-  //   theater_id: formModel.value.theater,
-  //   name: formModel.value.name,
-  //   seat_row: formModel.value.row,
-  //   seat_col: formModel.value.col,
-  //   seat: getSeatStr()
-  // })
-  // if (res.data.status === 200) {
-  //   ElMessage({ message: '创建影厅成功', type: 'success' })
-  // } else {
-  //   ElMessage({ message: '操作失败，请稍后重试', type: 'error' })
-  // }
+  const res = await hallAddService({
+    theater_id: theater_id,
+    name: formModel.value.name,
+    seat_row: Number(formModel.value.row),
+    seat_column: Number(formModel.value.col),
+    seat: getSeatStr()
+  })
+  if (res.data.status === 200) {
+    ElMessage({ message: '创建影厅成功', type: 'success' })
+  } else {
+    ElMessage({ message: '操作失败，请稍后重试', type: 'error' })
+  }
 }
 </script>
 

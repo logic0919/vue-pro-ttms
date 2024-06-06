@@ -21,7 +21,7 @@ const adminHall = () => {
 }
 const delHall = inject('delHall')
 const delHallFn = () => {
-  ElMessageBox.confirm('确定保留该种状态吗？', '提示')
+  ElMessageBox.confirm('确定删除这个场次吗？', '提示')
     .then(async () => {
       const res = await hallDelService(props.id)
       if (res.data.status === 200) {

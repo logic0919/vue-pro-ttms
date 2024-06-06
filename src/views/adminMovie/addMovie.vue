@@ -9,15 +9,6 @@ const onChange = (i) => {
 }
 sort.shift()
 const refs = ref(new Array(length).fill(false))
-let resCateArr = []
-// 在提交的时候才执行这个函数，用于生成tag数组
-const getResCateArr = () => {
-  for (let i = 0; i < sort.length; i++) {
-    if (refs.value[i] === true) {
-      resCateArr.push(i + 1 + '')
-    }
-  }
-}
 // 关于表单
 const formModel = ref({
   name: '',
@@ -27,14 +18,17 @@ const formModel = ref({
   duration: '',
   intro: ''
 })
+const formData1 = new FormData()
+const formData2 = new FormData()
+const formData3 = new FormData()
 const form = ref(null)
 const rules = ref({
-  name: [{ required: true, message: '请输入电影中文名称', trigger: 'blur' }],
-  engName: [{ required: true, message: '请输入电影英文名称', trigger: 'blur' }],
-  area: [{ required: true, message: '请输入电影地区', trigger: 'blur' }],
-  date: [{ required: true, message: '请输入电影上映时间', trigger: 'blur' }],
-  duration: [{ required: true, message: '请输入电影时长', trigger: 'blur' }],
-  intro: [{ required: true, message: '请输入电影简介', trigger: 'blur' }]
+  // name: [{ required: true, message: '请输入电影中文名称', trigger: 'blur' }],
+  // engName: [{ required: true, message: '请输入电影英文名称', trigger: 'blur' }],
+  // area: [{ required: true, message: '请输入电影地区', trigger: 'blur' }],
+  // date: [{ required: true, message: '请输入电影上映时间', trigger: 'blur' }],
+  // duration: [{ required: true, message: '请输入电影时长', trigger: 'blur' }],
+  // intro: [{ required: true, message: '请输入电影简介', trigger: 'blur' }]
 })
 // 关于导演输入
 const inputValue = ref('')
@@ -84,57 +78,70 @@ const handleInputConfirm1 = () => {
   inputVisible1.value = false
   inputValue1.value = ''
 }
-const carouse = ref([])
-console.log(formatDate(formModel.value.date))
+const refsToArr = (obj) => {
+  // 遍历obj，如果值为true，将其键值添加到数组中
+  const arr = []
+  for (const key in obj) {
+    if (obj[key]) {
+      arr.push(Number(key) + 1)
+    }
+  }
+  return arr
+}
+const refToArr = (arr) => {
+  let newArr = []
+  for (let i = 0; i < arr.length; i++) {
+    newArr.push(arr[i])
+  }
+  return newArr
+}
+// setInterval(() => {
+//   console.log({
+//     category_id: refsToArr(refs.value).join(','),
+//     directors: refToArr(dynamicTags.value).join(','),
+//     actors: refToArr(dynamicTags1.value).join(',')
+//   })
+// }, 3000)
 const addMovie = async () => {
+  let date = formatDate(formModel.value.date)
   await form.value.validate()
-  const res = movieAddService({
+  const res = await movieAddService({
     chinese_name: formModel.value.name,
     english_name: formModel.value.engName,
-    category_id: getResCateArr(),
+    category_id: refsToArr(refs.value).join(','),
     area: formModel.value.area,
-    show_time: formModel.value.date,
+    show_time: date.slice(0, date.length - 1),
     duration: formModel.value.duration,
-    directors: dynamicTags.value,
-    actors: dynamicTags1.value,
-    introduction: formModel.value.intro
-    // movie_img: obj.movie_img,
-    // director_img: obj.director_img,
-    // actor_img: obj.actor_img
+    directors: refToArr(dynamicTags.value).join(','),
+    actors: refToArr(dynamicTags1.value).join(','),
+    introduction: formModel.value.intro,
+    movie_img: formData1.get('file'),
+    director_img: formData2.get('file'),
+    actor_img: formData3.get('file')
   })
   if (res.status === 200) {
-    carouse.value = res.data.data.item
+    ElMessage.success('影片创建成功')
   } else {
-    ElMessage.error('轮播图失败')
+    ElMessage.error('影片创建失败')
   }
 }
-// 关于图片上传
-import { Plus } from '@element-plus/icons-vue'
-
-// import { UploadProps, UploadUserFile } from 'element-plus'
-
-const fileList = ref([
-  {
-    name: 'food.jpeg',
-    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-  },
-  {
-    name: 'haha.jpg',
-    url: 'https://element-plus.org/images/plant-1.png'
-  }
-])
-
-const dialogImageUrl = ref('')
-const dialogVisible = ref(false)
-
-const handleRemove = (uploadFile, uploadFiles) => {
-  console.log(uploadFile, uploadFiles)
+// 关于图片操作
+const handleFileChange1 = (file, fileList) => {
+  formData1.append('file', fileList[fileList.length - 1].raw)
 }
-
-const handlePictureCardPreview = (uploadFile) => {
-  dialogImageUrl.value = uploadFile.url
-  dialogVisible.value = true
+const handleFileChange2 = (file, fileList) => {
+  formData2.append('file', fileList[fileList.length - 1].raw)
 }
+const handleFileChange3 = (file, fileList) => {
+  formData3.append('file', fileList[fileList.length - 1].raw)
+}
+// setInterval(() => {
+//   console.log({
+//     movie_img: formData1.get('file'),
+//     director_img: formData2.get('file'),
+//     actor_img: formData3.get('file')
+//   })
+// }, 2000)
 </script>
 
 <template>
@@ -164,7 +171,7 @@ const handlePictureCardPreview = (uploadFile) => {
             placeholder="请输入影片时长"
           /><template #append>分钟</template>
         </el-form-item>
-        <el-form-item label="上映日期" class="form-item" required>
+        <el-form-item label="上映日期" prop="date" class="form-item" required>
           <el-col :span="11">
             <el-form-item prop="date1">
               <el-date-picker
@@ -262,21 +269,42 @@ const handlePictureCardPreview = (uploadFile) => {
         </el-form-item>
         <el-form-item label="影片图集" class="form-item">
           <el-upload
-            v-model:file-list="fileList"
-            @click="test2"
-            action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+            ref="uploadRef"
+            action="https://jsonplaceholder.typicode.com/posts/"
             list-type="picture-card"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove"
-            :submit="test"
-            :handleStart="test1"
+            :auto-upload="false"
+            :on-change="handleFileChange1"
           >
-            <el-icon><Plus /></el-icon>
+            <el-button size="small" plain style="width: 60px" type="primary"
+              >选择文件</el-button
+            >
           </el-upload>
-
-          <el-dialog v-model="dialogVisible">
-            <img w-full :src="dialogImageUrl" alt="Preview Image" />
-          </el-dialog>
+        </el-form-item>
+        <el-form-item label="导演图片" class="form-item">
+          <el-upload
+            ref="uploadRef"
+            action="https://jsonplaceholder.typicode.com/posts/"
+            list-type="picture-card"
+            :auto-upload="false"
+            :on-change="handleFileChange2"
+          >
+            <el-button size="small" plain style="width: 60px" type="primary"
+              >选择文件</el-button
+            >
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="演员图片" class="form-item">
+          <el-upload
+            ref="uploadRef"
+            action="https://jsonplaceholder.typicode.com/posts/"
+            list-type="picture-card"
+            :auto-upload="false"
+            :on-change="handleFileChange3"
+          >
+            <el-button size="small" plain style="width: 60px" type="primary"
+              >选择文件</el-button
+            >
+          </el-upload>
         </el-form-item>
         <el-button class="btn" type="primary" @click="addMovie"
           >添加电影</el-button

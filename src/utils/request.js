@@ -32,7 +32,7 @@ instance.interceptors.response.use(
   },
   (err) => {
     ElMessage({
-      message: err || '服务异常',
+      message: '服务异常',
       type: 'error'
     })
     console.log(err)

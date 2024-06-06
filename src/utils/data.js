@@ -31,6 +31,21 @@ const sort = [
   '儿童',
   '其他'
 ]
+const sortToStr = (arr) => {
+  // 将一个数字数组转成字符串，对应关系为数组元素在sort数组中的索引，例如[1,2,3]转为"全部 爱情喜剧"
+  let str = ''
+  for (let i = 0; i < arr.length; i++) {
+    str += sort[arr[i]] + ' '
+  }
+  return str
+}
+const findSortIndex = (a) => {
+  for (let i = 0; i < sort.length; i++) {
+    if (sort[i] === a) {
+      return i
+    }
+  }
+}
 const theaters = [
   { key: 1, value: 'ACTO梦空间影城' },
   { key: 2, value: 'CGV影城' },
@@ -38,7 +53,7 @@ const theaters = [
   { key: 4, value: 'SFC上影影城' },
   { key: 5, value: 'SOE太平洋影城' }
 ]
-const findtheaterName = (id = 1) => {
+const findtheaterName = (id) => {
   return theaters.find((item) => item.key === id).value
 }
 const findtheaterId = (name) => {
@@ -122,5 +137,7 @@ export {
   getDate,
   formatTime,
   formatDate,
-  formatTime1
+  formatTime1,
+  sortToStr,
+  findSortIndex
 }

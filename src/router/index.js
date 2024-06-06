@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import login from '../views/login/login.vue'
+import login from '../views/login/indexPage.vue'
 import register from '../views/login/register.vue'
 import user from '../views/user/index.vue'
 import movieDetail from '../views/movieDetail/index.vue'
@@ -20,7 +20,10 @@ import showSession from '@/views/adminSession/showSession.vue'
 import addSession from '@/views/adminSession/addSession.vue'
 import viewSession from '@/views/adminSession/viewSession.vue'
 import movieSession from '@/views/movieDetail/movieSession.vue'
+import viewMovie from '@/views/adminMovie/viewMovie.vue'
+import showMovie from '@/views/adminMovie/showMovie.vue'
 import notFound from '@/views/notFound/index.vue'
+import index from '@/views/index/index.vue'
 // import { useUserStore } from '@/stores/index'
 
 const router = createRouter({
@@ -29,6 +32,11 @@ const router = createRouter({
     {
       path: '/',
       redirect: '/movieDetail/111'
+    },
+    {
+      path: '/index',
+      component: index,
+      name: 'index'
     },
     {
       path: '/login',
@@ -93,6 +101,16 @@ const router = createRouter({
           path: '/admin/addMovie',
           name: 'addMovie',
           component: addMovie
+        },
+        {
+          path: '/admin/showMovie',
+          name: 'showMovie',
+          component: showMovie
+        },
+        {
+          path: '/admin/viewMovie/:id',
+          name: 'viewMovie',
+          component: viewMovie
         },
         // 关于影院管理
         {

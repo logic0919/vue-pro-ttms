@@ -7,60 +7,8 @@ import {
 } from '../../api/movie'
 import { onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { findSortIndex } from '../../utils/data'
 const movie_list = ref([])
-movie_list.value = [
-  {
-    id: 1,
-    chinese_name: '战狼',
-    english_name: 'chinese_wolf',
-    category: '爱情 喜剧 动画 ',
-    area: '中国',
-    duration: 7200000000000,
-    showtime: '2017-01-10T16:00:00Z',
-    introduction: '爱国 超级爱国',
-    img_path:
-      'https://p0.pipi.cn/mmdb/54ecde87b530faecd887a9594b90e05caa15d.jpg?imageView2/1/w/160/h/220',
-    on_sale: false,
-    score: 0,
-    sales: 0,
-    directors: null,
-    actors: null
-  },
-  {
-    id: 1,
-    chinese_name: '战狼',
-    english_name: 'chinese_wolf',
-    category: '爱情 喜剧 动画 ',
-    area: '中国',
-    duration: 7200000000000,
-    showtime: '2017-01-10T16:00:00Z',
-    introduction: '爱国 超级爱国',
-    img_path:
-      'https://p0.pipi.cn/mmdb/54ecde87b530faecd887a9594b90e05caa15d.jpg?imageView2/1/w/160/h/220',
-    on_sale: false,
-    score: 0,
-    sales: 0,
-    directors: null,
-    actors: null
-  },
-  {
-    id: 2,
-    chinese_name: '战狼',
-    english_name: 'chinese_wolf',
-    category: '爱情 喜剧 动画 ',
-    area: '中国',
-    duration: 7200000000000,
-    showtime: '2017-01-10T16:00:00Z',
-    introduction: '爱国 超级爱国',
-    img_path:
-      'https://p0.pipi.cn/mmdb/54ecde87b530faecd887a9594b90e05caa15d.jpg?imageView2/1/w/160/h/220',
-    on_sale: true,
-    score: 0,
-    sales: 0,
-    directors: null,
-    actors: null
-  }
-]
 onMounted(() => {
   refNav.value.children[0].style.backgroundColor = 'red'
 })
@@ -105,17 +53,23 @@ const switchNav = (num, e) => {
   sort_id.value = 0
   page.value = 0
   lastActive.value.style.color = 'black'
+  lastActive.value.style.backgroundColor = 'transparent'
   lastActive.value = ref1.value.children[0]
-  lastActive.value.style.color = 'red'
+  lastActive.value.style.color = 'white'
+  lastActive.value.style.backgroundColor = 'red'
 }
 // 发送全部类型、第一页的函数
 const getHot = async () => {
   const res = await movieGetHotService({
     page: page.value,
-    id: sort_id.value
+    id: findSortIndex(sort[sort_id.value])
   })
-  if (res.status === 200) {
-    movie_list.value = res.data.data.item
+  if (res.data.status === 200) {
+    if (res.data.data.item === null) {
+      movie_list.value = []
+    } else {
+      movie_list.value = res.data.data.item
+    }
   } else {
     ElMessage.error('获取影片列表失败')
   }
@@ -123,10 +77,14 @@ const getHot = async () => {
 const getUnreleased = async () => {
   const res = await movieGetUnreleasedService({
     page: page.value,
-    id: sort_id.value
+    id: findSortIndex(sort[sort_id.value])
   })
-  if (res.status === 200) {
-    movie_list.value = res.data.data.item
+  if (res.data.status === 200) {
+    if (res.data.data.item === null) {
+      movie_list.value = []
+    } else {
+      movie_list.value = res.data.data.item
+    }
   } else {
     ElMessage.error('获取影片列表失败')
   }
@@ -134,10 +92,14 @@ const getUnreleased = async () => {
 const getAll = async () => {
   const res = await movieGetAllService({
     page: page.value,
-    id: sort_id.value
+    id: findSortIndex(sort[sort_id.value])
   })
-  if (res.status === 200) {
-    movie_list.value = res.data.data.item
+  if (res.data.status === 200) {
+    if (res.data.data.item === null) {
+      movie_list.value = []
+    } else {
+      movie_list.value = res.data.data.item
+    }
   } else {
     ElMessage.error('获取影片列表失败')
   }
@@ -148,12 +110,15 @@ const ref1 = ref(null)
 const lastActive = ref()
 setTimeout(() => {
   lastActive.value = ref1.value.children[0]
-  lastActive.value.style.color = 'red'
+  lastActive.value.style.backgroundColor = 'red'
+  lastActive.value.style.color = 'white'
 }, 10)
 // 切换类型
 const switchSort = (e, num) => {
+  lastActive.value.style.backgroundColor = 'transparent'
   lastActive.value.style.color = 'black'
-  e.target.style.color = 'red'
+  e.target.style.backgroundColor = 'red'
+  e.target.style.color = 'white'
   lastActive.value = e.target
   sort_id.value = num
 }
@@ -169,15 +134,15 @@ watch(
   (newValue) => {
     if (newValue.nav === 0) {
       console.log('发hot请求')
-      console.log(nav_id.value, sort[sort_id.value], page.value)
+      console.log(nav_id.value, findSortIndex(sort[sort_id.value]), page.value)
       getHot()
     } else if (newValue.nav === 1) {
       console.log('发unreleased请求')
-      console.log(nav_id.value, sort[sort_id.value], page.value)
+      console.log(nav_id.value, findSortIndex(sort[sort_id.value]), page.value)
       getUnreleased()
     } else if (newValue.nav === 2) {
       console.log('发all请求')
-      console.log(nav_id.value, sort[sort_id.value], page.value)
+      console.log(nav_id.value, findSortIndex(sort[sort_id.value]), page.value)
       getAll()
     }
   },
@@ -209,7 +174,7 @@ watch(
           </div>
         </div>
       </div>
-      <div class="container">
+      <div class="container" v-if="movie_list.length">
         <div class="show">
           <movieBox
             v-for="i in movie_list"
@@ -232,7 +197,9 @@ watch(
           />
         </div>
       </div>
+      <div class="empty" v-else><empty-com></empty-com></div>
     </div>
+    <tail-box></tail-box>
   </div>
 </template>
 

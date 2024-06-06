@@ -22,7 +22,7 @@ const time = props.duration / 60000000000
     <div class="img">
       <img :src="img" alt="" />
       <div class="info">
-        <div class="duration">{{ time }}</div>
+        <div class="duration">{{ time }}分钟</div>
         <div class="cateGory">{{ category }}</div>
       </div>
     </div>

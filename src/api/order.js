@@ -1,20 +1,56 @@
 import request from '@/utils/request'
 // 创建订单
-const orderSetService = (obj) => {
-  return request.get('/api/v1/submit-order', {
-    user_id: obj.user,
-    movie_id: obj.movie,
-    session_id: obj.session,
-    seat_id: obj.seat,
-    num: obj.num,
-    type: obj.type
+const orderSetService = (id, seat, movie_id, num) => {
+  return request.post('/api/v1/submit-order', {
+    session_id: id,
+    seat: seat,
+    movie_id: movie_id,
+    num
   })
 }
-// 获取某个订单
-const orderGetService = (order_id) => {
-  return request.get('/api/v1/order', {
+// 倒计时confirm
+// order_id
+const orderConfirmService = (order_id) => {
+  console.log(order_id)
+  return request.post('/api/v1/confirm-order', {
     order_id
   })
 }
-// 获取所有订单
-export { orderSetService, orderGetService }
+
+// 支付pay
+// order_id
+const orderPayService = (order_id) => {
+  return request.post('/api/v1/pay-order', {
+    order_id
+  })
+}
+
+// 退款return
+// order_id
+const orderReturnService = (order_id) => {
+  console.log(order_id)
+  return request.delete('/api/v1/return-order', {
+    params: { order_id }
+  })
+}
+
+// get个人订单
+// user_id
+// 0:待支付
+// 1：已支付
+// 2：已完成
+// 3：已退款
+
+const orderGetUserService = (user_id) => {
+  return request.get('/api/v1/user-orders', {
+    params: { user_id }
+  })
+}
+
+export {
+  orderSetService,
+  orderConfirmService,
+  orderPayService,
+  orderReturnService,
+  orderGetUserService
+}

@@ -1,54 +1,36 @@
 <script setup>
 // import { Location, Menu, Document, Setting } from '@element-plus/icons-vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { hallGetListService } from '@/api/hall'
-import { computed, onMounted, provide, ref } from 'vue'
-const route = useRoute()
+import { computed, provide, ref, watch } from 'vue'
 const router = useRouter()
-const theater_id = route.params.id
-console.log(theater_id)
+const theater_id = ref('')
 const hallList = ref([])
 const hallNum = computed(() => {
   return hallList.value.length
 })
-hallList.value = [
-  {
-    CreatedAt: '2024-05-28T08:24:42Z',
-    UpdatedAt: '2024-05-28T08:24:44Z',
-    DeletedAt: null,
-    ID: 1,
-    Name: '星河世纪',
-    theaterID: 1,
-    SeatRow: 4,
-    SeatColumn: 5,
-    Seat: '1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1'
-  },
-  {
-    CreatedAt: '2024-05-28T08:25:00Z',
-    UpdatedAt: '2024-05-28T08:24:46Z',
-    DeletedAt: null,
-    ID: 2,
-    Name: '启程',
-    theaterID: 1,
-    SeatRow: 4,
-    SeatColumn: 5,
-    Seat: '1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1'
-  }
-]
 const getList = async () => {
-  const res = await hallGetListService(theater_id)
+  const res = await hallGetListService(theater_id.value)
   if (res.data.status === 200) {
     hallList.value = res.data.data.item
+    if (hallList.value === null) {
+      hallList.value = []
+    }
   } else {
     ElMessage({ message: '演出厅列表获取失败', type: 'error' })
   }
 }
-onMounted(() => {
-  getList()
-})
+watch(
+  () => router.currentRoute.value,
+  (newValue) => {
+    theater_id.value = newValue.params.id
+    getList()
+  },
+  { immediate: true }
+)
 // 路由跳转至添加影厅的界面
 const addHall = () => {
-  router.push(`/admin/addHall/${theater_id}`)
+  router.push(`/admin/addHall/${theater_id.value}`)
 }
 const delHall = (targetId) => {
   hallList.value = hallList.value.filter((item) => item.ID !== targetId)
@@ -68,7 +50,8 @@ provide('delHall', (id) => {
         >
       </div>
     </div>
-    <div class="main">
+    <div class="empty" v-if="hallList.length == 0"><empty-com></empty-com></div>
+    <div class="main" v-else>
       <div class="nav">
         <div class="id">影厅id</div>
         <div class="name">影厅名称</div>

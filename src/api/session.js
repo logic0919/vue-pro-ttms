@@ -2,15 +2,19 @@ import request from '@/utils/request'
 // 获得某场次信息
 const sessionGetOneService = (id) => {
   return request.get('/api/v1/admin/session', {
-    id
+    params: {
+      id
+    }
   })
 }
 // 获得某影院场次列表
 const sessionGetListService = (theater_id, movie_id, date) => {
   return request.get('/api/v1/admin/sessions', {
-    theater_id,
-    movie_id,
-    date
+    params: {
+      theater_id: theater_id,
+      movie_id: movie_id,
+      date: date.slice(0, date.length - 1)
+    }
   })
 }
 // 新建场次
@@ -26,12 +30,12 @@ const sessionAddService = (obj) => {
 // 删除某场次
 const sessionDelService = (id) => {
   return request.delete('/api/v1/admin/delete-session', {
-    session_id: id
+    params: { session_id: id }
   })
 }
 // 修改场次信息
 const sessionAlertService = (obj) => {
-  return request.post('//api/v1/admin/alter-session', {
+  return request.put('/api/v1/admin/alter-session', {
     session_id: obj.session_id,
     theater_id: obj.theater_id,
     movie_id: obj.movie_id,

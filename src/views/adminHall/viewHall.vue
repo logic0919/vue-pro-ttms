@@ -2,15 +2,15 @@
 import { ref, provide, onMounted } from 'vue'
 import { hallGetService, hallChangeService } from '@/api/hall'
 import { ElMessage } from 'element-plus'
-const props = defineProps({
-  theater_id: Number,
-  id: Number
-})
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const id = route.params.id
+const theater_id = route.params.theater_id
 // 关于表单
 const formModel = ref({
-  name: 'xing',
-  col: '2',
-  row: '2'
+  name: '',
+  col: '',
+  row: ''
 })
 const form = ref(null)
 const rules = ref({
@@ -27,10 +27,6 @@ const trueInfo = ref({
 const seat = ref([])
 let realSeat = []
 const trueSeat = ref([])
-trueSeat.value = [
-  [1, 1],
-  [1, 0]
-]
 const copyArr = (originalArray) => {
   let newArray = []
   for (let i = 0; i < originalArray.length; i++) {
@@ -41,17 +37,16 @@ const copyArr = (originalArray) => {
   }
   return newArray
 }
-realSeat = copyArr(trueSeat.value)
-console.log(realSeat)
 const getInfo = async () => {
-  const res = await hallGetService(props.id)
+  const res = await hallGetService(id)
   if (res.data.status === 200) {
     const data = res.data.data
     // 赋值给存储真实数据的变量
-    trueInfo.value.col = data.Name
+    trueInfo.value.name = data.Name
     trueInfo.value.row = data.SeatRow
-    trueInfo.value.name = data.SeatColumn
+    trueInfo.value.col = data.SeatColumn
     trueSeat.value = copyArr(data.Seat)
+    realSeat = copyArr(trueSeat.value)
     // 赋值给用于修改时展示数据的变量
     toTemp()
   } else {
@@ -69,7 +64,7 @@ onMounted(() => {
   getInfo()
 })
 // isChange控制当前是查看还是修改
-const isChange = ref(true)
+const isChange = ref(false)
 const switchOpea = (a) => {
   isChange.value = a
 }
@@ -88,8 +83,8 @@ const setSeat = () => {
     return
   }
   if (
-    formModel.value.row === trueSeat.value.length + '' &&
-    formModel.value.col === trueSeat.value[0].length + ''
+    formModel.value.row === trueSeat.value.length &&
+    Number(formModel.value.col) === trueSeat.value[0].length
   ) {
     seat.value = copyArr(trueSeat.value)
   } else {
@@ -133,13 +128,25 @@ const cancle = () => {
 const changeHall = async () => {
   // 需要先拦截掉边缘情况
   await form.value.validate()
+  if (Number(formModel.value.row) === 0 || Number(formModel.value.col) === 0) {
+    ElMessage.warning('请输入合适的行数和列数')
+    return
+  }
+  if (
+    Number(formModel.value.row) !== trueSeat.value.length ||
+    Number(formModel.value.col) !== trueSeat.value[0].length
+  ) {
+    ElMessage.warning('输入的行列数和设置的座位表的行列数不一致')
+    return
+  }
+
   const res = await hallChangeService({
-    id: props.id,
+    id: Number(id),
     name: formModel.value.name,
-    seat_row: formModel.value.row,
-    seat_column: formModel.value.col,
+    seat_row: Number(formModel.value.row),
+    seat_column: Number(formModel.value.col),
     seat: getSeatStr(),
-    theater_id: props.theater_id
+    theater_id: Number(theater_id)
   })
   if (res.data.status === 200) {
     ElMessage({ message: '修改影厅成功', type: 'success' })
@@ -149,7 +156,7 @@ const changeHall = async () => {
     trueInfo.value.name = data.SeatColumn
     trueSeat.value = copyArr(data.Seat)
     realSeat = copyArr(data.Seat)
-    switchOpea(true)
+    switchOpea(false)
   } else {
     ElMessage({ message: '操作失败，请稍后重试', type: 'error' })
   }

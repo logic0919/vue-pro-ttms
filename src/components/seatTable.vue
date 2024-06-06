@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps({
   row: Number,
   col: Number,
   seatDefault: Array
 })
+console.log(props)
 const seat = ref([])
 onMounted(() => {
   if (seat.value == []) {
@@ -16,12 +17,18 @@ onMounted(() => {
     seat.value = props.seatDefault
   }
 })
+const width = props.col * 50 + 'px'
+// const height = props.row * 40 + 'px'
+const style = computed(() => {
+  // return `width: ${props.row * 40}+ 'px';height:${props.col * 80} + 'px';background-color: rgb(240,240,240);`
+  return `width: ${width};height:600px;`
+})
 </script>
 
 <template>
-  <div class="seatTable">
+  <div class="seatTable" :style="style">
     <div class="row" v-for="(i, index) in seat" :key="index">
-      <h4>{{ index + 1 }}</h4>
+      <h4>{{ index + 1 > 9 ? index + 1 : '0' + (index + 1) }}</h4>
       <div class="seats">
         <seat-img
           v-for="(j, index1) in i"
@@ -39,8 +46,6 @@ onMounted(() => {
 .seatTable {
   padding-left: 40px;
   padding-right: 40px;
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -52,11 +57,11 @@ onMounted(() => {
     h4 {
       width: 10%;
       text-align: center;
+      margin-right: 20px;
     }
     .seats {
-      width: 90%;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       flex-wrap: nowrap;
       // border: 1px solid rgb(162, 86, 86);
     }

@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { sessionGetOneService, sessionAlertService } from '@/api/session'
+import { movieSearchService } from '@/api/movie'
 import { hallGetListService } from '@/api/hall'
 import { formatTime, findtheaterName } from '@/utils/data'
 
@@ -30,12 +31,7 @@ const cancle = () => {
 }
 // 把表单赋值给真实值
 const success = () => {
-  trueInfo.value.movie_name = formModel.value.movie_name
-  trueInfo.value.movie_id = formModel.value.movie_id
-  trueInfo.value.hall_id = formModel.value.hall_id
-  trueInfo.value.session_id = formModel.value.session_id
-  trueInfo.value.price = formModel.value.price
-  trueInfo.value.start = formModel.value.start
+  trueInfo.value.start = formatTime(formModel.value.start)
 }
 const changeSession = async () => {
   await form.value.validate()
@@ -47,8 +43,8 @@ const changeSession = async () => {
     theater_id: trueInfo.value.theater_id,
     movie_id: formModel.value.movie_id,
     hall_id: formModel.value.hall_id,
-    show_time: formatTime(formModel.value.start),
-    price: formModel.value.price,
+    show_time: new Date(formModel.value.start),
+    price: Number(formModel.value.price),
     session_id: trueInfo.value.session_id
   })
   if (res.data.status === 200) {
@@ -66,19 +62,11 @@ const changeSession = async () => {
   }
 }
 // 关于表单
-// const formModel = ref({
-//   theater_name: '',
-//   start: '',
-//   price: '',
-//   hall_id: '',
-//   movie_id: '',
-//   movie_name: ''
-// })
 const formModel = ref({
-  theater_name: 'abc影院',
+  theater_name: '',
   start: '',
   price: '',
-  hall_id: 1,
+  hall_id: '',
   movie_id: '',
   movie_name: ''
 })
@@ -93,19 +81,13 @@ const rules = ref({
 // 该影院的所有演出厅列表
 const hall_list = ref([])
 onMounted(async () => {
-  const res = await hallGetListService(trueInfo.value.theater_id)
-  if (res.data.status === 200) {
-    hall_list.value = res.data.data
-  } else {
-    ElMessage({ message: '影厅列表获取失败', type: 'error' })
-  }
-})
-onMounted(async () => {
   const res = await sessionGetOneService(session_id)
   if (res.data.status === 200) {
     const data = res.data.data
-    trueInfo.value.theater_name = findtheaterName(data.Hall.Theater.Id)
-    trueInfo.value.theater_id = data.Hall.Theater.Id
+    console.log(data)
+    console.log(findtheaterName(data.Hall.TheaterID))
+    trueInfo.value.theater_name = findtheaterName(data.Hall.TheaterID)
+    trueInfo.value.theater_id = data.Hall.TheaterID
     trueInfo.value.session_id = data.ID
     trueInfo.value.movie_name = data.Movie.ChineseName
     trueInfo.value.movie_id = data.Movie.ID
@@ -116,35 +98,32 @@ onMounted(async () => {
   } else {
     ElMessage({ message: '信息获取失败', type: 'error' })
   }
-})
-onMounted(() => {
+  const res1 = await hallGetListService(trueInfo.value.theater_id)
+  if (res1.data.status === 200) {
+    hall_list.value = res1.data.data.item
+  } else {
+    ElMessage({ message: '影厅列表获取失败', type: 'error' })
+  }
+
   cancle()
 })
-// 模拟数据
-hall_list.value = [
-  {
-    CreatedAt: '2024-05-28T08:24:42Z',
-    UpdatedAt: '2024-05-28T08:24:44Z',
-    DeletedAt: null,
-    ID: 1,
-    Name: '星河世纪',
-    theaterID: 1,
-    SeatRow: 4,
-    SeatColumn: 5,
-    Seat: '1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1'
-  },
-  {
-    CreatedAt: '2024-05-28T08:25:00Z',
-    UpdatedAt: '2024-05-28T08:24:46Z',
-    DeletedAt: null,
-    ID: 2,
-    Name: '启程',
-    theaterID: 1,
-    SeatRow: 4,
-    SeatColumn: 5,
-    Seat: '1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1'
+const movie_list = ref([])
+const loading = ref(false)
+const remoteMethod = async (query) => {
+  if (query) {
+    loading.value = true
+    const res = await movieSearchService(query)
+    loading.value = false
+    if (res.data.status === 200) {
+      movie_list.value = res.data.data.item
+      console.log(res.data.data)
+    } else {
+      movie_list.value = []
+    }
+  } else {
+    movie_list.value = []
   }
-]
+}
 </script>
 
 <template>
@@ -168,7 +147,7 @@ hall_list.value = [
         </el-form-item>
         <el-form-item label="影厅名称" prop="hall_id" class="form-item">
           <el-select
-            :disabled="disabled"
+            disabled
             v-model="formModel.hall_id"
             placeholder="请选择演出厅"
             style="width: 240px"
@@ -183,7 +162,6 @@ hall_list.value = [
         <el-form-item label="影片名称" prop="movie_name" class="form-item">
           <el-select
             v-model="formModel.movie_name"
-            multiple
             filterable
             remote
             reserve-keyword
@@ -192,19 +170,19 @@ hall_list.value = [
             :remote-method="remoteMethod"
             :loading="loading"
             style="width: 240px"
-            :disabled="disabled"
+            disabled
           >
             <el-option
               v-for="item in movie_list"
               :key="item.id"
-              :label="item.name"
-              :value="item.name"
+              :label="item.chinese_name"
+              :value="item.chinese_name"
             />
           </el-select>
         </el-form-item>
         <el-form-item label="价格" prop="price" class="form-item">
           <el-input
-            :disabled="disabled"
+            disabled
             v-model="formModel.price"
             placeholder="请输入价格"
           />

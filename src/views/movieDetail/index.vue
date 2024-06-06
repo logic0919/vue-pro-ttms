@@ -1,24 +1,50 @@
 <script setup>
 import { Promotion } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
+import { movieGetInfoService } from '@/api/movie'
+import { ElMessage } from 'element-plus'
+import { sortToStr } from '@/utils/data'
+import { ref } from 'vue'
 const route = useRoute()
 const router = useRouter()
-const nowRoute = route.params.id
-const introRoute = `/movieDetail/${nowRoute}/introduction`
-const performerRoute = `/movieDetail/${nowRoute}/performer`
-const pictureRoute = `/movieDetail/${nowRoute}/picture`
-const sessionRoute = `/movieSession/${nowRoute}`
+const movie_id = Number(route.params.id)
+const introRoute = `/movieDetail/${movie_id}/introduction`
+const performerRoute = `/movieDetail/${movie_id}/performer`
+const sessionRoute = `/movieSession/${movie_id}`
 router.replace(introRoute)
+const movie = ref('')
+const eng = ref('')
+const duration = ref('')
+const type = ref([])
+const area = ref('')
+const img = ref('')
+const getInfo = async () => {
+  const res = await movieGetInfoService(movie_id)
+  if (res.data.status === 200) {
+    const data = res.data.data
+    console.log(data)
+    movie.value = data.chinese_name
+    eng.value = data.english_name
+    duration.value = data.duration / 60000000000
+    area.value = data.area
+    type.value = sortToStr(data.category_id)
+    img.value = data.img_path
+  } else {
+    ElMessage.error('影片信息获取失败')
+  }
+}
+getInfo()
 </script>
 <template>
   <div class="movieDetail">
     <div class="top">
       <div class="top-main">
-        <img class="img" src="../../assets/image/movie.png" alt="" />
+        <img class="img" :src="img" alt="" />
         <div class="info">
-          <div class="movieName">哈尔的移动城堡</div>
-          <div class="type">类型：剧情、爱情</div>
-          <div class="time">时长：108分钟</div>
+          <div class="movieName">{{ movie }}</div>
+          <div class="engName">{{ eng }}</div>
+          <div class="type">{{ type }}</div>
+          <div class="time">时长：{{ duration }}分钟</div>
           <button class="btn" @click="router.push(sessionRoute)">购票</button>
         </div>
       </div>
@@ -47,16 +73,11 @@ router.replace(introRoute)
             </el-icon>
             <span style="font-size: 20px">演职人员</span>
           </el-menu-item>
-          <el-menu-item :index="pictureRoute">
-            <el-icon>
-              <Promotion />
-            </el-icon>
-            <span style="font-size: 20px">图集</span>
-          </el-menu-item>
         </el-menu>
       </div>
       <div class="menushow"><router-view></router-view></div>
     </div>
+    <tail-box></tail-box>
   </div>
 </template>
 
@@ -93,7 +114,8 @@ router.replace(introRoute)
         // background-color: antiquewhite;
         .movieName,
         .type,
-        .time {
+        .time,
+        .engName {
           color: aliceblue;
           font-size: 16px;
           // height: 30px;
@@ -103,6 +125,7 @@ router.replace(introRoute)
         }
         .movieName {
           font-size: 30px;
+          color: rgb(252, 63, 63);
         }
         .btn {
           width: 100%;
@@ -112,6 +135,19 @@ router.replace(introRoute)
           color: rgb(255, 255, 255);
           font-size: 20px;
           letter-spacing: 10px;
+        }
+        .btnGro {
+          width: 100%;
+          height: 46px;
+          display: flex;
+          justify-content: space-between;
+          .btn1 {
+            width: 45%;
+            border-color: transparent;
+            color: rgb(255, 255, 255);
+            background-color: rgb(92, 176, 233);
+            font-size: 15px;
+          }
         }
       }
     }

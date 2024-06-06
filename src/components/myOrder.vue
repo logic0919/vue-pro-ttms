@@ -1,4 +1,6 @@
 <script setup>
+import { formatDate } from '@/utils/data'
+import { computed, inject } from 'vue'
 const props = defineProps({
   id: String,
   date: String,
@@ -9,26 +11,48 @@ const props = defineProps({
   seat: Array,
   price: Number,
   status: Number,
-  img: String
+  img: String,
+  theater: String
 })
-console.log(props)
+const statusStr = computed(() => {
+  if (props.status === 0) {
+    return '待支付'
+  } else if (props.status === 1) {
+    return '待完成'
+  } else if (props.status === 2) {
+    return '已完成'
+  } else if (props.status === 3) {
+    return '已退款'
+  }
+  return ''
+})
+const backMoney = inject('backMoney')
 </script>
 
 <template>
   <div class="myOrder">
     <div class="top">
-      <div class="date">2023-12-02</div>
-      <div class="id">猫眼订单号:24560713327</div>
+      <div class="date">{{ formatDate(date) }}</div>
+      <div class="id">猫眼订单号:{{ id }}</div>
     </div>
     <div class="main1">
-      <div class="img"><img src="../assets/image/movie.png" alt="" /></div>
+      <div class="img"><img :src="img" alt="" /></div>
       <div class="detail">
-        <div class="name">《热搜》</div>
-        <div class="hall">5厅(激光厅)</div>
-        <div class="seat">13排1座 13排2座</div>
+        <div class="name">{{ name }}</div>
+        <div class="hall">{{ hall }}</div>
       </div>
-      <div class="price">￥68</div>
-      <div class="status">已完成</div>
+      <div class="seat">
+        <div class="seatGro">
+          <div v-for="i in seat" :key="i">{{ i }}</div>
+        </div>
+      </div>
+      <div class="price">￥{{ price }}</div>
+      <div class="status">{{ statusStr }}</div>
+      <div class="opea">
+        <el-button type="primary" @click="backMoney(id)" v-if="status === 1"
+          >退款</el-button
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -68,7 +92,7 @@ console.log(props)
       }
     }
     .detail {
-      width: 30%;
+      width: 15%;
       height: 80%;
       display: flex;
       justify-content: space-between;
@@ -76,6 +100,7 @@ console.log(props)
       align-items: flex-start;
       .name {
         font-size: 23px;
+        color: red;
       }
       .hall,
       .seat {
@@ -83,11 +108,19 @@ console.log(props)
         color: rgb(133, 133, 133);
       }
     }
+    .seat {
+      width: 18%;
+    }
     .price {
-      width: 20%;
+      width: 10%;
+      font-size: 20px;
+      color: red;
     }
     .status {
-      width: 27%;
+      width: 20%;
+    }
+    .opea {
+      width: 12%;
     }
   }
 }
