@@ -1,28 +1,34 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import login from '../views/login/indexPage.vue'
-import register from '../views/login/register.vue'
-import user from '../views/user/index.vue'
-import movieDetail from '../views/movieDetail/index.vue'
-import movieDetailIntro from '../views/movieDetail/movieDetailIntro.vue'
-import movieDetailPerformer from '../views/movieDetail/movieDetailPerformer.vue'
-import movieDetailPicture from '../views/movieDetail/movieDetailPicture.vue'
-import movie from '../views/movie/index.vue'
-import addMovie from '../views/adminMovie/addMovie.vue'
-import order from '../views/order/setOrder.vue'
-import orderShow from '../views/order/payOrder.vue'
-import addHall from '../views/adminHall/addHall.vue'
-import addTheater from '@/views/adminTheater/addTheater.vue'
-import admin from '@/views/admin/index.vue'
-import showHall from '@/views/adminHall/showHall.vue'
-import viewHall from '@/views/adminHall/viewHall.vue'
-import showSession from '@/views/adminSession/showSession.vue'
-import addSession from '@/views/adminSession/addSession.vue'
-import viewSession from '@/views/adminSession/viewSession.vue'
-import movieSession from '@/views/movieDetail/movieSession.vue'
-import viewMovie from '@/views/adminMovie/viewMovie.vue'
-import showMovie from '@/views/adminMovie/showMovie.vue'
-import notFound from '@/views/notFound/index.vue'
+// 首页相关
 import index from '@/views/index/index.vue'
+import movie from '../views/movie/index.vue'
+import user from '../views/user/index.vue'
+// 非首页相关
+
+const login = import('../views/login/indexPage.vue')
+const register = import('../views/login/register.vue')
+const movieDetail = import('../views/movieDetail/index.vue')
+const movieDetailIntro = import('../views/movieDetail/movieDetailIntro.vue')
+const movieDetailPerformer = import(
+  '../views/movieDetail/movieDetailPerformer.vue'
+)
+const movieDetailPicture = import('../views/movieDetail/movieDetailPicture.vue')
+const addMovie = import('../views/adminMovie/addMovie.vue')
+const order = import('../views/order/setOrder.vue')
+const orderShow = import('../views/order/payOrder.vue')
+const addHall = import('../views/adminHall/addHall.vue')
+const addTheater = import('@/views/adminTheater/addTheater.vue')
+const admin = import('@/views/admin/index.vue')
+const showHall = import('@/views/adminHall/showHall.vue')
+const viewHall = import('@/views/adminHall/viewHall.vue')
+const showSession = import('@/views/adminSession/showSession.vue')
+const addSession = import('@/views/adminSession/addSession.vue')
+const viewSession = import('@/views/adminSession/viewSession.vue')
+const movieSession = import('@/views/movieDetail/movieSession.vue')
+const viewMovie = import('@/views/adminMovie/viewMovie.vue')
+const showMovie = import('@/views/adminMovie/showMovie.vue')
+const notFound = import('@/views/notFound/index.vue')
+
 import { useUserStore } from '@/stores/index'
 
 const router = createRouter({
@@ -192,13 +198,13 @@ const adminUrls = [
 ]
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
-  const id = userStore.id
+  const token = userStore.token
   const status = userStore.status
   //   管理员要求页面
   if (adminUrls.includes(to.name)) {
     console.log('进入管理页面')
     // 登录并且身份是管理员
-    if (!(id && status === 'administrator')) {
+    if (!(token && status === 'administrator')) {
       ElMessage.error('权限不足，无法访问')
       return
     }
@@ -206,7 +212,7 @@ router.beforeEach((to, from, next) => {
   // 登录要求页面
   else if (authUrls.includes(to.name)) {
     console.log('进入登录限制页面')
-    if (!id) {
+    if (!token) {
       ElMessage.error('请先登录')
       next('/login')
       return

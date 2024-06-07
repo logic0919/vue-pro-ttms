@@ -267,6 +267,7 @@ watch(
     .container {
       .show {
         display: flex;
+        // background-color: antiquewhite;
         justify-content: space-between;
         flex-wrap: wrap;
       }

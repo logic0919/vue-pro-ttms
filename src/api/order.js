@@ -1,6 +1,7 @@
 import request from '@/utils/request'
 // 创建订单
 const orderSetService = (id, seat, movie_id, num) => {
+  console.log(id, seat, movie_id, num)
   return request.post('/api/v1/submit-order', {
     session_id: id,
     seat: seat,

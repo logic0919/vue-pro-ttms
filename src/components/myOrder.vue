@@ -1,4 +1,5 @@
 <script setup>
+import router from '@/router'
 import { formatDate } from '@/utils/data'
 import { computed, inject } from 'vue'
 const props = defineProps({
@@ -27,6 +28,9 @@ const statusStr = computed(() => {
   return ''
 })
 const backMoney = inject('backMoney')
+const gotoPay = (id) => {
+  router.push(`/orderShow?orderId=${id}`)
+}
 </script>
 
 <template>
@@ -51,6 +55,9 @@ const backMoney = inject('backMoney')
       <div class="opea">
         <el-button type="primary" @click="backMoney(id)" v-if="status === 1"
           >退款</el-button
+        >
+        <el-button type="primary" @click="gotoPay(id)" v-if="status === 0"
+          >去支付</el-button
         >
       </div>
     </div>
